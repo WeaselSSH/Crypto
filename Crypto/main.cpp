@@ -15,7 +15,7 @@ int main()
 {
     int opcion = 0;
     do {
-        cout << "============CIFRADO CESAR============" << nl;
+        cout << "============CRYPTO============" << nl;
         cout << "1. Cifrado Cesar" << nl;
         cout << "4. Salir" << nl;
         cout << "Elija una opcion: ";
