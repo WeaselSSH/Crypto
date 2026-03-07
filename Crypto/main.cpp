@@ -7,21 +7,23 @@ using namespace std;
 #define nl '\n' //uso esto por comodidad porque el alt en qt agarra otras cosas y no puedo usar el ascii
 // |
 
-char cifrarPorCesar(int asciiCaracter, int desplazamiento);
+string cifrarPorCesar(const string& mensaje, int desplazamiento);
+string desencriptarCesar(const string& mensaje, int desplazamiento);
 int validarEntero();
 int validarEnteroPositivo();
 
 int main()
 {
-    int opcion = 0;
+    int opcionPrincipal = 0;
+
     do {
         cout << "============CRYPTO============" << nl;
         cout << "1. Cifrado Cesar" << nl;
         cout << "4. Salir" << nl;
         cout << "Elija una opcion: ";
-        opcion = validarEntero();
+        opcionPrincipal = validarEntero();
 
-        switch (opcion) {
+        switch (opcionPrincipal) {
         case 1: {
             /*FUNCIONAMIENTO DEL ALGORITMO
              *
@@ -52,45 +54,105 @@ int main()
              *  k el desplazamiento de la letra
              */
 
-            string fraseIngresada = "";
-            string fraseEncriptada = "";
+            int opcionCesar = 0;
 
-            cout << "============CIFRADO CESAR============" << nl;
-            cout << "Ingrese el mensaje a encriptar: ";
-            getline(cin, fraseIngresada);
+            do {
+                cout << "============CIFRADO CESAR============" << nl;
+                cout << "1. Encriptar mensaje" << nl;
+                cout << "2. Desencriptar mensaje" << nl;
+                cout << "3. Salir" << nl;
+                cout << "Ingrese una opcion: ";
+                opcionCesar = validarEntero();
 
-            cout << "Ingrese un numero entero positivo al cual desea desplazar cada letra del mensaje: ";
-            int desplazamiento = validarEnteroPositivo();
+                switch (opcionCesar) {
+                case 1: {
+                    string fraseIngresada = "";
+                    string fraseEncriptada = "";
 
-            for (size_t i = 0; i < fraseIngresada.length(); i++) {
-                int asciiCaracterEvaluar = (int) fraseIngresada.at(i);
-                char caracterEncriptado = cifrarPorCesar(asciiCaracterEvaluar, desplazamiento);
+                    cout << "Ingrese el mensaje a encriptar: ";
+                    getline(cin, fraseIngresada);
 
-                fraseEncriptada += caracterEncriptado;
-            }
+                    cout << "Ingrese un numero entero positivo al cual desea desplazar cada letra del mensaje: ";
+                    int desplazamiento = validarEnteroPositivo();
 
-            cout << "Mensaje encriptado: " << fraseEncriptada << nl;
+                    fraseEncriptada = cifrarPorCesar(fraseIngresada, desplazamiento);
+
+                    cout << "Mensaje encriptado: " << fraseEncriptada << nl;
+                    break;
+                }
+                case 2: {
+                    string fraseIngresada = "";
+                    string fraseDesencriptada = "";
+
+                    cout << "Ingrese el mensaje a desencriptar: ";
+                    getline(cin, fraseIngresada);
+
+                    cout << "Ingrese la constante de desplazamiento: ";
+                    int desplazamiento = validarEnteroPositivo();
+
+                    fraseDesencriptada = desencriptarCesar(fraseIngresada, desplazamiento);
+
+                    cout << "Mensaje desencriptado: " << fraseDesencriptada << nl;
+                    break;
+                }
+                case 3:
+                    cout << "Regresando al menu principal..." << nl;
+                    break;
+                default:
+                    cout << "Error: opcion no valida, intente de nuevo." << nl;
+                }
+            } while (opcionCesar != 3);
+
             break;
         }
         case 4:
+            cout << "Saliendo del programa..." << nl;
             break;
         default:
             cout << "Error: numero invalido. Intente de nuevo." << nl;
         }
 
-    } while (opcion != 4);
+    } while (opcionPrincipal != 4);
 
     return 0;
 }
 
-char cifrarPorCesar(int asciiCaracter, int desplazamiento) {
-    if (asciiCaracter >= 97 && asciiCaracter <= 122) {
-        return (char) (((asciiCaracter - 97 + desplazamiento) % 26) + 97);
-    } else if (asciiCaracter >= 65 && asciiCaracter <= 90) {
-        return (char) (((asciiCaracter - 65 + desplazamiento) % 26) + 65);
-    } else {
-        return (char) asciiCaracter;
+string cifrarPorCesar(const string& mensaje, int desplazamiento)
+{
+    string mensajeEncriptado = "";
+
+    for (size_t i = 0; i < mensaje.length(); i++) {
+        int asciiCaracter = (int)mensaje.at(i);
+
+        if (asciiCaracter >= 97 && asciiCaracter <= 122) {
+            mensajeEncriptado += (char)(((asciiCaracter + desplazamiento - 97) % 26) + 97);
+        } else if (asciiCaracter >= 65 && asciiCaracter <= 90) {
+            mensajeEncriptado += (char)(((asciiCaracter + desplazamiento - 65) % 26) + 65);
+        } else {
+            mensajeEncriptado += (char)asciiCaracter;
+        }
     }
+
+    return mensajeEncriptado;
+}
+
+string desencriptarCesar(const string& mensaje, int desplazamiento)
+{
+    string mensajeDesencriptado = "";
+
+    for (size_t i = 0; i < mensaje.length(); i++) {
+        int asciiCaracter = (int)mensaje.at(i);
+
+        if (asciiCaracter >= 97 && asciiCaracter <= 122) {
+            mensajeDesencriptado += (char)(((asciiCaracter - desplazamiento - 97 + 26) % 26) + 97);
+        } else if (asciiCaracter >= 65 && asciiCaracter <= 90) {
+            mensajeDesencriptado += (char)(((asciiCaracter - desplazamiento - 65 + 26) % 26) + 65);
+        } else {
+            mensajeDesencriptado += (char)asciiCaracter;
+        }
+    }
+
+    return mensajeDesencriptado;
 }
 
 int validarEntero()
