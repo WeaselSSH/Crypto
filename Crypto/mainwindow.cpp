@@ -1,33 +1,30 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "manejocriptografia.h"
+
+#include "manejoarchivos.h"
 
 #include <QApplication>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QString>
-#include <string>
-#include <fstream>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 using namespace std;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->stackedWidget->hide();
+    QRegularExpression regex("[A-Za-z]+");
+    QValidator *validador = new QRegularExpressionValidator(regex, this);
+    ui->txtKey->setValidator(validador);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-void MainWindow::on_btnSalir_clicked()
-{
-    QApplication::quit();
-}
-
 
 void MainWindow::on_btnSeleccionarArchivo_clicked()
 {
@@ -39,50 +36,40 @@ void MainWindow::on_btnSeleccionarArchivo_clicked()
     }
 }
 
+void MainWindow::on_btnEncriptar_clicked()
+{
+    aplicarCifrado(OperacionCriptografica::Encriptar);
+}
+
+void MainWindow::on_btnDesencriptar_clicked()
+{
+    aplicarCifrado(OperacionCriptografica::Desencriptar);
+}
 
 void MainWindow::on_rbCesar_clicked()
 {
-    ui->stackedWidget->show();
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->txtKey->clear();
-
+    actualizarStackedWidget(1);
     actualizarEstadoBotones();
+    ui->txtKey->clear();
 }
 
 
 void MainWindow::on_rbXor_clicked()
 {
-    ui->stackedWidget->show();
-    ui->stackedWidget->setCurrentIndex(0);
-
+    actualizarStackedWidget(0);
     actualizarEstadoBotones();
 }
 
 
 void MainWindow::on_rbVigenere_clicked()
 {
-    ui->stackedWidget->show();
-    ui->stackedWidget->setCurrentIndex(0);
-
+    actualizarStackedWidget(0);
     actualizarEstadoBotones();
 }
 
-void MainWindow::on_btnEncriptar_clicked()
+void MainWindow::on_btnSalir_clicked()
 {
-    if(procesarTextoArchivo(true)) {
-        QMessageBox::information(this, "Encriptacion", "Encriptacion realizada exitosamente");
-    } else {
-        QMessageBox::warning(this, "Encriptacion", "Error al encriptar el archivo. Verifique que el archivo a encriptar exista");
-    }
-}
-
-void MainWindow::on_btnDesencriptar_clicked()
-{
-    if(procesarTextoArchivo(false)) {
-        QMessageBox::information(this, "Desencriptacion", "Desencriptacion realizada exitosamente");
-    } else {
-        QMessageBox::warning(this, "Desencriptacion", "Error al desencriptar el archivo. Verifique que el archivo a desencriptar exista");
-    }
+    QApplication::quit();
 }
 
 void MainWindow::on_txtKey_textChanged(const QString &arg1)
@@ -91,62 +78,62 @@ void MainWindow::on_txtKey_textChanged(const QString &arg1)
 }
 
 //funciones auxiliares
-bool MainWindow::procesarTextoArchivo(bool encriptar) {
-    QString rutaArchivo = ui->txtRutaArchivo->text().trimmed();
-    string textoAProcesar = getTextoArchivo(ui->txtRutaArchivo->text().trimmed());
+void MainWindow::aplicarCifrado(OperacionCriptografica operacion)
+{
+    string rutaArchivo = ui->txtRutaArchivo->text().trimmed().toStdString();
 
-    //debe ir en un if realmente
+    AlgoritmoCriptografico algoritmo = obtenerAlgoritmoCriptografico();
     int desplazamiento = ui->spinDesplazamiento->value();
-    string textoProcesado = algoritmoCesar(textoAProcesar, desplazamiento, encriptar);
+    string key = ui->txtKey->text().trimmed().toStdString();
 
-    if (setTextoArchivo(rutaArchivo, textoProcesado)) return true;
+    bool sePudoProcesar = procesarArchivo(rutaArchivo, algoritmo, operacion, desplazamiento, key);
 
-    return false;
-}
-
-string MainWindow::getTextoArchivo(const QString &ruta) {
-    string rutaArchivo = ruta.toStdString();
-
-    ifstream archivo(rutaArchivo.c_str(), ios::binary);
-
-    if (!archivo.is_open()) {
-        return "";
+    if (!sePudoProcesar) {
+        mostrarError("Error: no se pudo procesar el archivo. Verifique que el archivo exista y no se encuentre vacio.");
+        return;
     }
 
-    archivo.seekg(0, ios::end);
-    streamsize tamanio = archivo.tellg();
-    archivo.seekg(0, ios::beg);
-
-    string contenido(tamanio, '\0');
-    archivo.read(&contenido[0], tamanio);
-
-    archivo.close();
-    return contenido;
+    if (operacion == OperacionCriptografica::Encriptar) mostrarExito("Archivo encriptado correctamente.");
+    else mostrarExito("Archivo desencriptado correctamente.");
 }
 
-bool MainWindow::setTextoArchivo(const QString &ruta, const string &texto) {
-    string rutaArchivo = ruta.toStdString();
-
-    ofstream archivo(rutaArchivo.c_str(), ios::binary);
-
-    if (!archivo.is_open()) {
-        return false;
-    }
-
-    archivo.write(texto.c_str(), texto.size());
-
-    archivo.close();
-    return true;
+AlgoritmoCriptografico MainWindow::obtenerAlgoritmoCriptografico()
+{
+    if (ui->rbCesar->isChecked()) return AlgoritmoCriptografico::Cesar;
+    if (ui->rbXor->isChecked()) return AlgoritmoCriptografico::XOR;
+    return AlgoritmoCriptografico::Vigenere;
 }
 
-void MainWindow::actualizarEstadoBotones() {
+void MainWindow::actualizarEstadoBotones()
+{
+    //se crean variables booleanas por operaciones en vez de un solo if para una mejor legibilidad
+    bool esCesar = ui->rbCesar->isChecked();
+    bool esXor = ui->rbXor->isChecked();
+    bool esVigenere = ui->rbVigenere->isChecked();
+
     bool hayArchivo = !ui->txtRutaArchivo->text().trimmed().isEmpty();
     bool hayKey = !ui->txtKey->text().trimmed().isEmpty();
 
-    if ( (ui->rbCesar->isChecked() && hayArchivo) || ((ui->rbXor->isChecked() || ui->rbVigenere->isChecked()) && hayArchivo && hayKey) ) {
-        ui->btnEncriptar->setEnabled(true);
-        ui->btnDesencriptar->setEnabled(true);
-    } else {
-        ui->btnDesencriptar->setEnabled(false);
-    }
+    bool requiereKey = (esXor || esVigenere);
+    bool habilitarBotones = hayArchivo && (esCesar || hayKey && requiereKey);
+
+    ui->btnEncriptar->setEnabled(habilitarBotones);
+    ui->btnDesencriptar->setEnabled(habilitarBotones);
 }
+
+void MainWindow::actualizarStackedWidget(int idx)
+{
+    ui->stackedWidget->show();
+    ui->stackedWidget->setCurrentIndex(idx);
+}
+
+void MainWindow::mostrarError(const QString &mensaje)
+{
+    QMessageBox::critical(this, "Error", mensaje);
+}
+
+void MainWindow::mostrarExito(const QString &mensaje)
+{
+    QMessageBox::information(this, "Exito", mensaje);
+}
+

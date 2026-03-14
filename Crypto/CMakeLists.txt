@@ -12,6 +12,9 @@ qt_add_executable(Crypto
     mainwindow.h
     mainwindow.ui
     manejocriptografia.h manejocriptografia.cpp
+    manejoarchivos.h manejoarchivos.cpp
+
+
 
 )
 

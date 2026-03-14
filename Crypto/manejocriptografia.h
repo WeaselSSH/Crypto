@@ -3,10 +3,19 @@
 
 #include <string>
 
-using namespace std;
+enum class OperacionCriptografica {
+    Encriptar,
+    Desencriptar
+};
 
-string algoritmoCesar(const string &texto, int desplazamiento, bool encriptar);
-string algoritmoXOR(const string &texto, string key, bool encriptar);
-string algoritmoVigenere(const string &texto, string key, bool encriptar);
+enum class AlgoritmoCriptografico {
+    Cesar,
+    XOR,
+    Vigenere
+};
+
+std::string algoritmoCesar(const std::string &texto, int desplazamiento, OperacionCriptografica modoCriptografia);
+std::string algoritmoXOR(const std::string &texto, const std::string &key, OperacionCriptografica modoCriptografia);
+std::string algoritmoVigenere(const std::string &texto, const std::string &key, OperacionCriptografica modoCriptografia);
 
 #endif // MANEJOCRIPTOGRAFIA_H

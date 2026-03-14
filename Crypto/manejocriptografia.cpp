@@ -1,6 +1,10 @@
 #include "manejocriptografia.h"
 
-string algoritmoCesar(const string &texto, int desplazamiento, bool encriptar) {
+#include <string>
+
+using namespace std;
+
+string algoritmoCesar(const string &texto, int desplazamiento, OperacionCriptografica modoCriptografia) {
     /*FUNCIONAMIENTO DEL ALGORITMO
              *
              * Este cifrado consiste en desplazar cada letra de la frase/palabra por un numero entero k el cual es un valor constante
@@ -33,7 +37,7 @@ string algoritmoCesar(const string &texto, int desplazamiento, bool encriptar) {
              *  del intervalo se le suma 26 a la operacion.
              */
     string textoProcesado = "";
-    if (!encriptar) desplazamiento = -desplazamiento;
+    if (modoCriptografia == OperacionCriptografica::Desencriptar) desplazamiento = -desplazamiento;
 
     for (size_t i = 0; i < texto.length(); i++) {
         int asciiCaracter = (int)texto.at(i);
