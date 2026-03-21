@@ -18,6 +18,7 @@ std::string algoritmoCesar(const std::string &texto, int desplazamiento, Operaci
 std::string algoritmoXOR(const std::string &texto, const std::string &key, OperacionCriptografica modoCriptografia);
 std::string algoritmoVigenere(const std::string &texto, const std::string &key, OperacionCriptografica modoCriptografia);
 
+char aplicarDesplazamiento(int asciiCaracter, int desplazamiento);
 std::string numeroDecimalABinario(int numeroDecimal);
 int numeroBinarioADecimal(const std::string &numeroBinario);
 

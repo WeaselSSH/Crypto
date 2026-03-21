@@ -38,18 +38,12 @@ string algoritmoCesar(const string &texto, int desplazamiento, OperacionCriptogr
     */
 
     string textoProcesado = "";
+
     if (modoCriptografia == OperacionCriptografica::Desencriptar) desplazamiento = -desplazamiento;
 
     for (size_t i = 0; i < texto.length(); i++) {
         int asciiCaracter = (int)texto.at(i);
-
-        if (asciiCaracter >= 97 && asciiCaracter <= 122) {
-            textoProcesado += (char)(((asciiCaracter + desplazamiento - 97 + 26) % 26) + 97);
-        } else if (asciiCaracter >= 65 && asciiCaracter <= 90) {
-            textoProcesado += (char)(((asciiCaracter + desplazamiento - 65 + 26) % 26) + 65);
-        } else {
-            textoProcesado += (char)asciiCaracter;
-        }
+        textoProcesado += aplicarDesplazamiento((int) asciiCaracter, desplazamiento);
     }
 
     return textoProcesado;
@@ -144,7 +138,7 @@ string algoritmoXOR(const string &texto, const string &key, OperacionCriptografi
 
     if (key.empty()) return texto;
 
-    string textoEncriptado = "";
+    string textoProcesado = "";
 
     for (size_t i = 0; i < texto.length(); i++) {
         char charEvaluarTexto = texto.at(i);
@@ -166,10 +160,10 @@ string algoritmoXOR(const string &texto, const string &key, OperacionCriptografi
 
         int numeroDecimalResultante = numeroBinarioADecimal(binarioResultado);
 
-        textoEncriptado += (char) numeroDecimalResultante;
+        textoProcesado += (char) numeroDecimalResultante;
     }
 
-    return textoEncriptado;
+    return textoProcesado;
 }
 
 string numeroDecimalABinario(int numeroDecimal) {
@@ -198,4 +192,78 @@ int numeroBinarioADecimal(const string &binario) {
     }
 
     return numeroDecimal;
+}
+
+string algoritmoVigenere(const string &texto, const string &key, OperacionCriptografica modoCriptografia) {
+    /* FUNCIONAMIENTO DEL ALGORITMO:
+     *
+     * Este es una especia de combinacion de los algoritmos previos, pues la idea principal se basa al igual que el cifrado XOR usar una llave
+     * ingresada por el usuario para poder encriptar un mensaje, la diferencia viene en lo que hace con cada caracter pues en vez de usar el
+     * operador XOR lo que hace es asignarle a cada letra de la llave un numero el cual es la posicion en el intervalo del alfabeto, como en
+     * el cifrado Cesar. De forma mas detallada, la logica de este algoritmo es el siguiente:
+     *
+     * 1) Leer llave ingresada por el usuario
+     * 2) Comparar primera letra de la llave con primera letra del mensaje
+     * 3) aplicar a la letra del mensaje un desplazamiento acorde al numero de la letra de la llave (basado en su posicion en el alfabeto)
+     * 4) repetir para cada letra del mensaje
+     *
+     * Como siempre, el desplazamiento es en base mod 26 y la key hay que hacer las mismas validaciones que con el cifrado XOR para verificar
+     * que coincida el tamano de esta con el tamano del mensaje.
+     */
+
+    if (key.empty()) return texto;
+
+    string textoEncriptado = "";
+    size_t indiceKey = 0;
+    /* como a veces puede ser que una posicion del texto sea un espacio, se puede desincronizar el indice que se tiene guardado del texto y la
+    llave, por lo que es util tener un indice de la llave para no depender de solo el contador del for */
+
+    for (size_t i = 0; i < texto.length(); i++) {
+        char charEvaluarTexto = texto.at(i);
+
+        bool esLetra = ((charEvaluarTexto >= 97 && charEvaluarTexto <= 122) || (charEvaluarTexto >= 65 && charEvaluarTexto <= 90));
+
+        if (!esLetra) {
+            textoEncriptado += charEvaluarTexto;
+            continue;
+        }
+
+        char charEvaluarKey = key.at(indiceKey % key.length());
+        int desplazamiento = 0;
+
+        bool esMinuscula = charEvaluarKey >= 97 && charEvaluarKey <= 122;
+        bool esMayuscula = charEvaluarKey >= 65 && charEvaluarKey <= 90;
+
+        if (esMinuscula) {
+            desplazamiento = charEvaluarKey - 97;
+        } else if (esMayuscula) {
+            desplazamiento = charEvaluarKey - 65;
+        } else {
+            textoEncriptado += charEvaluarTexto;
+            indiceKey++;
+            continue;
+        }
+
+        if (modoCriptografia == OperacionCriptografica::Desencriptar) {
+            desplazamiento = -desplazamiento;
+        }
+
+        textoEncriptado += aplicarDesplazamiento((int) charEvaluarTexto, desplazamiento);
+        indiceKey++;
+    }
+
+    return textoEncriptado;
+}
+
+char aplicarDesplazamiento(int asciiCaracter, int desplazamiento) {
+    bool esMinuscula = asciiCaracter >= 97 && asciiCaracter <= 122;
+    bool esMayuscula = asciiCaracter >= 65 && asciiCaracter <= 90;
+
+    if (esMinuscula) {
+        return (char)(((asciiCaracter + desplazamiento - 97 + 26) % 26) + 97);
+    } else if (esMayuscula) {
+        return (char)(((asciiCaracter + desplazamiento - 65 + 26) % 26) + 65);
+    } else {
+        return (char)asciiCaracter;
+    }
 }

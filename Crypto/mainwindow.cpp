@@ -83,8 +83,8 @@ void MainWindow::aplicarCifrado(OperacionCriptografica operacion)
     string rutaArchivo = ui->txtRutaArchivo->text().trimmed().toStdString();
 
     AlgoritmoCriptografico algoritmo = obtenerAlgoritmoCriptografico();
-    int desplazamiento = ui->spinDesplazamiento->value();
     string key = ui->txtKey->text().trimmed().toStdString();
+    int desplazamiento = ui->spinDesplazamiento->value();
 
     bool sePudoProcesar = procesarArchivo(rutaArchivo, algoritmo, operacion, desplazamiento, key);
 
