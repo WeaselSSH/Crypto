@@ -57,7 +57,7 @@ bool procesarArchivo(const string &ruta, AlgoritmoCriptografico algoritmo, Opera
         textoProcesado = algoritmoXOR(texto, key, operacion);
         break;
     case AlgoritmoCriptografico::Vigenere:
-        //textoProcesado = algoritmoVigenere(texto, key, operacion);
+        textoProcesado = algoritmoVigenere(texto, key, operacion);
         break;
     }
 
