@@ -17,7 +17,7 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>290</x>
       <y>10</y>
       <width>271</width>
       <height>41</height>
@@ -29,7 +29,7 @@
      </font>
     </property>
     <property name="text">
-     <string>PROYECTO CRYPTO</string>
+     <string>PROYECTO CRIPTO</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnSalir">
